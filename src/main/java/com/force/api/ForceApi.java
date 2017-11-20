@@ -443,7 +443,20 @@ public class ForceApi {
     }
 
 	public DescribeSObject describeSObject(String sobject) {
-		return describeSObject(sobject, null);
+        try {
+            return jsonMapper.readValue(apiRequest(new HttpRequest()
+                    .url(uriBase()+"/sobjects/"+sobject+"/describe")
+                    .method("GET")
+                    .header("Accept", "application/json")).getStream(),DescribeSObject.class);
+        } catch (JsonParseException e) {
+            throw new ResourceException(e);
+        } catch (JsonMappingException e) {
+            throw new ResourceException(e);
+        } catch (UnsupportedEncodingException e) {
+            throw new ResourceException(e);
+        } catch (IOException e) {
+            throw new ResourceException(e);
+        }
 	}
 
 	/**
@@ -453,21 +466,21 @@ public class ForceApi {
 	 * @param since date that is used to identify if metadata has been changed since
      * @return the metadata for an object, null if no changes since provided date
      */
-	public DescribeSObject describeSObject(String sobject, Date since) {
+	public DescribeSObject describeSObjectIfModified(String sobject, Date since) {
+	    if(since == null) {
+	        return describeSObject(sobject);
+        }
 		try {
-			HttpRequest httpRequest = new HttpRequest()
-					.url(uriBase()+"/sobjects/"+sobject+"/describe")
-					.method("GET")
-					.header("Accept", "application/json");
-
-			if (since != null) {
-				// if the "If-Modified-Since" http header is used, then Salesforce responds with 304 code if
-				// there were not any changes since the date specified in the "If-Modified-Since" header
-				httpRequest.header("If-Modified-Since", new SimpleDateFormat(SF_DATE_FORMAT).format(since));
-			}
-			HttpResponse response = apiRequest(httpRequest);
-			return response.getResponseCode() == 304 ? null :
-					jsonMapper.readValue(response.getStream(), DescribeSObject.class);
+			HttpResponse response = apiRequest(new HttpRequest()
+                    .url(uriBase()+"/sobjects/"+sobject+"/describe")
+                    .method("GET")
+                    .header("Accept", "application/json")
+                    .header("If-Modified-Since", new SimpleDateFormat(SF_DATE_FORMAT).format(since)));
+			if(response.getResponseCode() == 304) {
+			    return null;
+            } else {
+                return jsonMapper.readValue(response.getStream(), DescribeSObject.class);
+            }
 		} catch (JsonParseException e) {
 			throw new ResourceException(e);
 		} catch (JsonMappingException e) {
@@ -505,7 +518,7 @@ public class ForceApi {
 		}
 		// 304 is a special case when the "If-Modified-Since" header is used, it is not an error,
 		// it indicates that SF objects were not changed since the time specified in the "If-Modified-Since" header
-		if (res.getResponseCode() > 299 && res.getResponseCode() != 304) {
+		if(res.getResponseCode()>299 && res.getResponseCode()!=304) {
 			if(res.getResponseCode()==401) {
 				throw new ApiTokenException(res.getString());
 			} else {
