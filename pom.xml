@@ -25,7 +25,7 @@
     </licenses>
 
     <scm>
-        <connection>git@git.solnetsolutions.co.nz:force-rest-api/force-rest-api.git</connection>
+        <connection>scm:git:git@git.solnetsolutions.co.nz:force-rest-api/force-rest-api.git</connection>
         <tag>HEAD</tag>
     </scm>
 
