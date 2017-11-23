@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.frejo</groupId>
     <artifactId>force-rest-api</artifactId>
-    <version>0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <name>force-rest-api</name>
     <url>https://github.com/jesperfj/force-rest-api</url>
     <description>
@@ -36,14 +36,18 @@
     </properties>
 
     <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
         <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>almvn.releases</id>
+            <url>
+                http://almvn.solnetsolutions.co.nz/content/repositories/releases
+            </url>
         </repository>
+        <snapshotRepository>
+            <id>almvn.snapshots</id>
+            <url>
+                http://almvn.solnetsolutions.co.nz/content/repositories/snapshots
+            </url>
+        </snapshotRepository>
     </distributionManagement>
 
     <dependencies>
@@ -103,7 +107,7 @@
     </dependencies>
 
     <profiles>
-        <profile> 
+        <profile>
             <id>release</id>
             <activation>
                 <property>
